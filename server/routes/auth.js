@@ -55,7 +55,8 @@ router.post('/signup', async (req, res) => {
         });
     } catch (error) {
         console.error('Signup Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        // RETURN ACTUAL ERROR FOR DEBUGGING
+        res.status(500).json({ message: 'Server error', error: error.message, stack: error.stack });
     }
 });
 
@@ -104,16 +105,22 @@ router.post('/login', async (req, res) => {
 const passport = require('passport');
 
 // Debug Route (Temporary)
-router.get('/google/debug', (req, res) => {
+router.get('/debug', (req, res) => {
+    const mongoose = require('mongoose');
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const mongoUri = process.env.MONGODB_URI;
 
     res.json({
-        message: 'Google Auth Debug Info',
-        clientIdExists: !!clientId,
-        clientIdPrefix: clientId ? clientId.substring(0, 10) + '...' : 'MISSING',
-        clientSecretExists: !!clientSecret,
-        callbackURL: '/api/auth/google/callback'
+        message: 'System Debug Info',
+        nodeEnv: process.env.NODE_ENV,
+        mongoConnectionState: mongoose.connection.readyState, // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+        env: {
+            mongoUriExists: !!mongoUri,
+            clientIdExists: !!clientId,
+            clientSecretExists: !!clientSecret,
+            jwtSecretExists: !!process.env.JWT_SECRET
+        }
     });
 });
 
