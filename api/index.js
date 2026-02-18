@@ -14,8 +14,11 @@ try {
     };
 }
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
     try {
+        if (app.connectDB) {
+            await app.connectDB();
+        }
         return app(req, res);
     } catch (err) {
         console.error('Request Handler Error:', err);

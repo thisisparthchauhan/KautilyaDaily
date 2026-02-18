@@ -53,7 +53,13 @@ const connectDB = async () => {
     }
 };
 
-connectDB();
+// Attach to app for serverless usage
+app.connectDB = connectDB;
+
+// Only connect automatically in dev/production server mode, NOT when imported
+if (require.main === module) {
+    connectDB();
+}
 
 // Routes
 const authRoutes = require('./routes/auth');
