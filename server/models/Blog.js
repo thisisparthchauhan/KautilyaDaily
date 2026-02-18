@@ -26,4 +26,5 @@ const blogSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Blog', blogSchema);
+// Prevent model overwrite in serverless environment
+module.exports = mongoose.models.Blog || mongoose.model('Blog', blogSchema);
