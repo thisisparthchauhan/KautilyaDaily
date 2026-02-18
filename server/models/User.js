@@ -48,4 +48,5 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Prevent model overwrite in serverless environment
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
