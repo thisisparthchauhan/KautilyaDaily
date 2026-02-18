@@ -103,6 +103,20 @@ router.post('/login', async (req, res) => {
 // Google OAuth Routes
 const passport = require('passport');
 
+// Debug Route (Temporary)
+router.get('/google/debug', (req, res) => {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    res.json({
+        message: 'Google Auth Debug Info',
+        clientIdExists: !!clientId,
+        clientIdPrefix: clientId ? clientId.substring(0, 10) + '...' : 'MISSING',
+        clientSecretExists: !!clientSecret,
+        callbackURL: '/api/auth/google/callback'
+    });
+});
+
 // Initiate Google OAuth
 router.get('/google',
     passport.authenticate('google', { scope: ['profile', 'email'] })
