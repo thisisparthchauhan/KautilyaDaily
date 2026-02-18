@@ -1,6 +1,14 @@
 // In production (Vercel), we use relative paths so the requests go to the same domain
 // and are handled by the rewrite rules in vercel.json
-export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://127.0.0.1:5001');
+let apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://127.0.0.1:5001');
+
+// Safety check: specific to Vercel deployment where user might have set localhost
+if (import.meta.env.PROD && (apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1'))) {
+    console.warn('Ignoring VITE_API_URL because it points to localhost in production');
+    apiUrl = '';
+}
+
+export const API_URL = apiUrl;
 
 export const API_ENDPOINTS = {
     auth: {
