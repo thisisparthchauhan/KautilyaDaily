@@ -1,9 +1,28 @@
 // Vercel Serverless Function Handler
-const app = require('../server/index.js');
+let app;
+
+try {
+    app = require('../server/index.js');
+} catch (err) {
+    console.error('Failed to initialize server:', err);
+    app = (req, res) => {
+        res.status(500).json({
+            message: 'Server Initialization Failed',
+            error: err.message,
+            stack: err.stack
+        });
+    };
+}
 
 module.exports = (req, res) => {
-    // Ensure the app handles the request properly
-    // Vercel passes the request to the exported function
-    // If it's an express app, it's a function (req, res) => ...
-    return app(req, res);
+    try {
+        return app(req, res);
+    } catch (err) {
+        console.error('Request Handler Error:', err);
+        res.status(500).json({
+            message: 'Request Handler Failed',
+            error: err.message,
+            stack: err.stack
+        });
+    }
 };
