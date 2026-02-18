@@ -2,18 +2,37 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const passport = require('passport');
+const session = require('express-session');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Passport config
+require('./config/passport')(passport);
+
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5000',
+    origin: [process.env.FRONTEND_URL || 'http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:5000'],
     credentials: true
 }));
 app.use(express.json());
+
+// Session middleware (required for Passport)
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'kautilya-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kautilyadaily')

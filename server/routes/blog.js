@@ -8,9 +8,14 @@ const Blog = require('../models/Blog');
 // @access  Private
 router.post('/', auth, async (req, res) => {
     try {
+        console.log('Received blog creation request');
+        console.log('Request body:', req.body);
+        console.log('User:', req.user);
+
         const { title, content } = req.body;
 
         if (!title || !content) {
+            console.log('Missing title or content');
             return res.status(400).json({ message: 'Title and content are required' });
         }
 

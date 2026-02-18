@@ -117,9 +117,15 @@ export function ProfilePage() {
                 setNewBlog({ title: '', content: '' });
                 setIsCreatingBlog(false);
                 fetchBlogs(); // Refresh list
+                alert('Blog submitted for approval!');
+            } else {
+                const data = await response.json();
+                alert(`Failed to submit blog: ${data.message}`);
+                console.error('Failed to create blog:', data);
             }
         } catch (error) {
             console.error('Failed to create blog', error);
+            alert('An error occurred while submitting the blog.');
         } finally {
             setIsLoading(false);
         }

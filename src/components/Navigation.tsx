@@ -15,11 +15,13 @@ const navLinks = [
 export function Navigation({
   onAuthClick,
   onProfileClick,
-  onHomeClick
+  onHomeClick,
+  onBlogsClick
 }: {
   onAuthClick?: () => void;
   onProfileClick?: () => void;
   onHomeClick?: () => void;
+  onBlogsClick?: () => void;
 }) {
   const { isAuthenticated, user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,6 +70,12 @@ export function Navigation({
                   {link.name}
                 </a>
               ))}
+              <button
+                onClick={onBlogsClick}
+                className="text-sm font-medium text-kau-text-secondary hover:text-kau-accent transition-colors"
+              >
+                Blogs
+              </button>
             </div>
 
             {/* Right Actions */}
