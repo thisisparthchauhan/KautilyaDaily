@@ -124,36 +124,44 @@ router.get('/debug', (req, res) => {
     });
 });
 
-// Initiate Google OAuth
-router.get('/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Google OAuth Routes (Conditional)
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    // Initiate Google OAuth
+    router.get('/google',
+        passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
 
-// Google OAuth Callback
-router.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5000'}?error=google_auth_failed` }),
-    (req, res) => {
-        try {
-            // Generate JWT token
-            const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '7d' });
+    // Google OAuth Callback
+    router.get('/google/callback',
+        passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5000'}?error=google_auth_failed` }),
+        (req, res) => {
+            try {
+                // Generate JWT token
+                const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: '7d' });
 
-            // Prepare user data
-            const userData = {
-                id: req.user._id,
-                firstName: req.user.firstName,
-                lastName: req.user.lastName,
-                emailOrMobile: req.user.emailOrMobile,
-                role: req.user.role,
-            };
+                // Prepare user data
+                const userData = {
+                    id: req.user._id,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    emailOrMobile: req.user.emailOrMobile,
+                    role: req.user.role,
+                };
 
-            // Redirect to frontend with token and user data
-            const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5000';
-            res.redirect(`${frontendURL}?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`);
-        } catch (error) {
-            console.error('Google callback error:', error);
-            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5000'}?error=auth_failed`);
+                // Redirect to frontend with token and user data
+                const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5000';
+                res.redirect(`${frontendURL}?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`);
+            } catch (error) {
+                console.error('Google callback error:', error);
+                res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5000'}?error=auth_failed`);
+            }
         }
-    }
-);
+    );
+} else {
+    // Fallback if credentials are missing
+    router.get('/google', (req, res) => {
+        res.status(500).json({ message: 'Google Auth not configured on server' });
+    });
+}
 
 module.exports = router;

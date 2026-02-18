@@ -70,6 +70,16 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
+// Global Error Handler to ensure JSON response
+app.use((err, req, res, next) => {
+    console.error('Unhandled Express Error:', err);
+    res.status(500).json({
+        message: 'Internal Server Error',
+        error: err.message,
+        stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack
+    });
+});
+
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
