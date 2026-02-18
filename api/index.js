@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     } catch (err) {
         console.error('Request Handler Error:', err);
         res.status(500).json({
-            message: 'Request Handler Failed',
+            message: `Request Handler Failed: ${err.message}`,
             error: err.message,
             stack: err.stack
         });
