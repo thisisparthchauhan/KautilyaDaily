@@ -35,9 +35,25 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kautilyadaily')
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+// Database Connection
+let isConnected = false;
+
+const connectDB = async () => {
+    if (isConnected) return;
+
+    try {
+        const db = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kautilyadaily', {
+            bufferCommands: false, // Disable mongoose buffering
+        });
+        isConnected = db.connections[0].readyState;
+        console.log('MongoDB connected');
+    } catch (err) {
+        console.error('MongoDB connection error:', err);
+        // Do not exit process in serverless, just log
+    }
+};
+
+connectDB();
 
 // Routes
 const authRoutes = require('./routes/auth');
