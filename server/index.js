@@ -49,7 +49,9 @@ const connectDB = async () => {
         console.log('MongoDB connected');
     } catch (err) {
         console.error('MongoDB connection error:', err);
-        // Do not exit process in serverless, just log
+        isConnected = false;
+        // If imported (Serverless), throw the error so the handler knows we failed
+        if (require.main !== module) throw err;
     }
 };
 

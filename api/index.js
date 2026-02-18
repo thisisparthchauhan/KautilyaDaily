@@ -15,6 +15,15 @@ try {
 }
 
 module.exports = async (req, res) => {
+    // Fail fast if Critical Env Vars are missing
+    if (!process.env.MONGODB_URI) {
+        console.error('CRITICAL: MONGODB_URI is missing');
+        return res.status(500).json({
+            message: 'Configuration Error',
+            error: 'MONGODB_URI environment variable is not set',
+        });
+    }
+
     try {
         if (app.connectDB) {
             await app.connectDB();
