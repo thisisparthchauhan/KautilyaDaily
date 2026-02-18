@@ -1,5 +1,6 @@
-// API Configuration
-export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
+// In production (Vercel), we use relative paths so the requests go to the same domain
+// and are handled by the rewrite rules in vercel.json
+export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://127.0.0.1:5001');
 
 export const API_ENDPOINTS = {
     auth: {
