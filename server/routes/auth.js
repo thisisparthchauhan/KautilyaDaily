@@ -56,7 +56,7 @@ router.post('/signup', async (req, res) => {
     } catch (error) {
         console.error('Signup Error:', error);
         // RETURN ACTUAL ERROR FOR DEBUGGING
-        res.status(500).json({ message: 'Server error', error: error.message, stack: error.stack });
+        res.status(500).json({ message: `Signup Failed: ${error.message}`, error: error.message, stack: error.stack });
     }
 });
 
@@ -97,7 +97,7 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         console.error('Login Error:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: `Login Failed: ${error.message}`, error: error.message });
     }
 });
 
