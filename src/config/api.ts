@@ -28,5 +28,9 @@ export const API_ENDPOINTS = {
         list: `${API_URL}/api/blogs`,
         create: `${API_URL}/api/blogs`,
         byId: (id: string) => `${API_URL}/api/blogs/${id}`,
+        like: (id: string) => `${API_URL}/api/blogs/${id}/like`,
+        save: (id: string) => `${API_URL}/api/blogs/${id}/save`,
+        saved: `${API_URL}/api/blogs/saved`,
+        myBlogs: `${API_URL}/api/blogs/my-blogs`,
     },
 };

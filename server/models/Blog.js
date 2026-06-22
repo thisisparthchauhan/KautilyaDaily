@@ -20,11 +20,21 @@ const blogSchema = new mongoose.Schema({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending',
     },
+    image: {
+        type: String,
+    },
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    savedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
     createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-// Prevent model overwrite in serverless environment
 module.exports = mongoose.models.Blog || mongoose.model('Blog', blogSchema);

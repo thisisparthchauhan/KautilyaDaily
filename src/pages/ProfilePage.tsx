@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { User, MapPin, Globe, PenTool, Settings as SettingsIcon, Plus, X } from 'lucide-react';
+import { User, MapPin, Globe, PenTool, Settings as SettingsIcon, Plus, X, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API_URL } from '@/config/api';
@@ -11,18 +11,21 @@ interface Blog {
     content: string;
     status: 'pending' | 'approved' | 'rejected';
     createdAt: string;
+    image?: string;
+    author?: { firstName: string; lastName: string; role: string };
 }
 
 export function ProfilePage() {
     const { user, token, login } = useAuth();
-    const [activeTab, setActiveTab] = useState<'info' | 'blogs' | 'settings'>('info');
+    const [activeTab, setActiveTab] = useState<'info' | 'blogs' | 'saved' | 'settings'>('info');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Blog State
     const [blogs, setBlogs] = useState<Blog[]>([]);
+    const [savedBlogs, setSavedBlogs] = useState<Blog[]>([]);
     const [isCreatingBlog, setIsCreatingBlog] = useState(false);
-    const [newBlog, setNewBlog] = useState({ title: '', content: '' });
+    const [newBlog, setNewBlog] = useState({ title: '', content: '', image: '' });
 
     // Form State
     const [formData, setFormData] = useState({
@@ -47,24 +50,30 @@ export function ProfilePage() {
         }
     }, [user]);
 
-    // Fetch blogs when tab changes
     useEffect(() => {
-        if (activeTab === 'blogs') {
-            fetchBlogs();
-        }
+        if (activeTab === 'blogs') fetchBlogs();
+        if (activeTab === 'saved') fetchSavedBlogs();
     }, [activeTab]);
 
     const fetchBlogs = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/blogs/my-blogs`, {
+            const response = await fetch(API_ENDPOINTS.blogs.myBlogs, {
                 headers: { 'x-auth-token': token || '' },
             });
-            if (response.ok) {
-                const data = await response.json();
-                setBlogs(data);
-            }
+            if (response.ok) setBlogs(await response.json());
         } catch (error) {
             console.error('Failed to fetch blogs', error);
+        }
+    };
+
+    const fetchSavedBlogs = async () => {
+        try {
+            const response = await fetch(API_ENDPOINTS.blogs.saved, {
+                headers: { 'x-auth-token': token || '' },
+            });
+            if (response.ok) setSavedBlogs(await response.json());
+        } catch (error) {
+            console.error('Failed to fetch saved blogs', error);
         }
     };
 
@@ -114,7 +123,7 @@ export function ProfilePage() {
             });
 
             if (response.ok) {
-                setNewBlog({ title: '', content: '' });
+                setNewBlog({ title: '', content: '', image: '' });
                 setIsCreatingBlog(false);
                 fetchBlogs(); // Refresh list
                 alert('Blog submitted for approval!');
@@ -185,6 +194,19 @@ export function ProfilePage() {
                         <PenTool className="w-4 h-4 inline-block mr-2" />
                         My Blogs
                         {activeTab === 'blogs' && (
+                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-kau-accent" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('saved')}
+                        className={cn(
+                            'px-4 py-2 text-sm font-medium transition-colors relative',
+                            activeTab === 'saved' ? 'text-kau-text' : 'text-kau-text-secondary hover:text-kau-text'
+                        )}
+                    >
+                        <Bookmark className="w-4 h-4 inline-block mr-2" />
+                        Saved
+                        {activeTab === 'saved' && (
                             <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-kau-accent" />
                         )}
                     </button>
@@ -358,6 +380,18 @@ export function ProfilePage() {
                                         className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-kau-text focus:outline-none focus:border-kau-accent transition-colors resize-none"
                                         required
                                     />
+                                    <input
+                                        type="url"
+                                        placeholder="Cover image URL (optional) — e.g. https://images.unsplash.com/..."
+                                        value={newBlog.image}
+                                        onChange={(e) => setNewBlog({ ...newBlog, image: e.target.value })}
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-kau-text focus:outline-none focus:border-kau-accent transition-colors"
+                                    />
+                                    {newBlog.image && (
+                                        <div className="rounded-lg overflow-hidden border border-white/10 h-40">
+                                            <img src={newBlog.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                        </div>
+                                    )}
 
                                     <div className="flex justify-end gap-3">
                                         <button
@@ -376,6 +410,37 @@ export function ProfilePage() {
                                         </button>
                                     </div>
                                 </form>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'saved' && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-kau-text mb-6">Saved Blogs</h2>
+                            {savedBlogs.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <Bookmark className="w-12 h-12 text-kau-text-secondary mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-kau-text mb-2">No saved blogs yet</h3>
+                                    <p className="text-kau-text-secondary text-sm">Click the Save button on any blog to bookmark it here.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {savedBlogs.map((blog) => (
+                                        <div key={blog._id} className="bg-black/20 border border-white/5 rounded-lg p-4 flex gap-4">
+                                            {blog.image && (
+                                                <img src={blog.image} alt={blog.title} className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-base font-medium text-kau-text line-clamp-1">{blog.title}</h3>
+                                                <p className="text-kau-text-secondary text-sm mt-1 line-clamp-2">{blog.content}</p>
+                                                <div className="mt-2 text-xs text-kau-text-secondary">
+                                                    {blog.author && `${blog.author.firstName} ${blog.author.lastName} · `}
+                                                    {new Date(blog.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     )}

@@ -28,12 +28,17 @@ function AppContent() {
   const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Determine initial view based on URL path (basic internal routing)
     const path = window.location.pathname;
     if (path === '/admin') setCurrentView('admin');
     else if (path === '/profile') setCurrentView('profile');
     else if (path === '/blogs') setCurrentView('blogs');
-    else setCurrentView('home');
+    else if (path.startsWith('/blogs/')) {
+      const id = path.replace('/blogs/', '');
+      if (id) {
+        setSelectedBlogId(id);
+        setCurrentView('blog-detail');
+      }
+    } else setCurrentView('home');
   }, []);
 
   // Handle Google OAuth callback
@@ -73,12 +78,14 @@ function AppContent() {
   const handleBlogClick = (blogId: string) => {
     setSelectedBlogId(blogId);
     setCurrentView('blog-detail');
+    window.history.pushState({}, '', `/blogs/${blogId}`);
     window.scrollTo(0, 0);
   };
 
   const handleBackToBlogs = () => {
     setCurrentView('blogs');
     setSelectedBlogId(null);
+    window.history.pushState({}, '', '/blogs');
   };
 
   // Handle routing
