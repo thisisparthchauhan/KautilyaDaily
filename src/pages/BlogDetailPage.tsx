@@ -17,6 +17,7 @@ interface Blog {
     status: 'approved';
     createdAt: string;
     image?: string;
+    category?: string;
     likes: string[];
     savedBy: string[];
 }
@@ -152,14 +153,21 @@ export function BlogDetailPage({ blogId, onBack }: BlogDetailPageProps) {
 
                 {/* Hero content */}
                 <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 md:px-12 max-w-4xl z-10">
-                    <span className={cn(
-                        "inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider uppercase rounded-full border",
-                        isAdmin
-                            ? "text-kau-accent bg-kau-accent/10 border-kau-accent/30"
-                            : "text-blue-400 bg-blue-500/10 border-blue-500/20"
-                    )}>
-                        {isAdmin ? 'Curated Analysis' : 'Community Story'}
-                    </span>
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        <span className={cn(
+                            "inline-block px-3 py-1 text-xs font-bold tracking-wider uppercase rounded-full border",
+                            isAdmin
+                                ? "text-kau-accent bg-kau-accent/10 border-kau-accent/30"
+                                : "text-blue-400 bg-blue-500/10 border-blue-500/20"
+                        )}>
+                            {isAdmin ? 'Curated Analysis' : 'Community Story'}
+                        </span>
+                        {blog.category && blog.category !== 'General' && (
+                            <span className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-white/60">
+                                {blog.category}
+                            </span>
+                        )}
+                    </div>
                     <h1 className="text-3xl md:text-5xl font-heading font-bold text-white leading-tight mb-6">
                         {blog.title}
                     </h1>
@@ -237,13 +245,10 @@ export function BlogDetailPage({ blogId, onBack }: BlogDetailPageProps) {
                 </div>
 
                 {/* Content */}
-                <article className="prose prose-invert prose-lg max-w-none">
-                    {blog.content.split('\n').map((paragraph, idx) =>
-                        paragraph.trim()
-                            ? <p key={idx} className="mb-6 text-kau-text-secondary leading-relaxed text-lg">{paragraph}</p>
-                            : null
-                    )}
-                </article>
+                <article
+                    className="prose prose-invert prose-lg max-w-none prose-headings:text-kau-text prose-p:text-kau-text-secondary prose-p:leading-relaxed prose-strong:text-kau-text prose-blockquote:border-kau-accent prose-blockquote:text-kau-text-secondary prose-li:text-kau-text-secondary"
+                    dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
 
                 {/* Footer */}
                 <div className="mt-16 pt-8 border-t border-white/10">

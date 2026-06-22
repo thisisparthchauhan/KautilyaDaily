@@ -23,6 +23,11 @@ const blogSchema = new mongoose.Schema({
     image: {
         type: String,
     },
+    category: {
+        type: String,
+        enum: ['Markets', 'Economy', 'Tech', 'Policy', 'General'],
+        default: 'General',
+    },
     likes: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

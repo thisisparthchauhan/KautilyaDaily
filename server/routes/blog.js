@@ -57,7 +57,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/blogs — create blog
 router.post('/', auth, async (req, res) => {
     try {
-        const { title, content, image } = req.body;
+        const { title, content, image, category } = req.body;
         if (!title || !content) {
             return res.status(400).json({ message: 'Title and content are required' });
         }
@@ -65,6 +65,7 @@ router.post('/', auth, async (req, res) => {
             title,
             content,
             image: image || undefined,
+            category: category || 'General',
             author: req.user.id,
             status: 'pending',
         });

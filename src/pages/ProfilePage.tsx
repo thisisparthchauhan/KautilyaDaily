@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { User, MapPin, Globe, PenTool, Settings as SettingsIcon, Plus, X, Bookmark } from 'lucide-react';
+import { User, MapPin, Globe, PenTool, Settings as SettingsIcon, Plus, X, Bookmark, Tag, ImageIcon } from 'lucide-react';
+import { RichTextEditor } from '@/components/RichTextEditor';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { API_ENDPOINTS, API_URL } from '@/config/api';
@@ -25,7 +26,7 @@ export function ProfilePage() {
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [savedBlogs, setSavedBlogs] = useState<Blog[]>([]);
     const [isCreatingBlog, setIsCreatingBlog] = useState(false);
-    const [newBlog, setNewBlog] = useState({ title: '', content: '', image: '' });
+    const [newBlog, setNewBlog] = useState({ title: '', content: '', image: '', category: 'General' });
 
     // Form State
     const [formData, setFormData] = useState({
@@ -119,11 +120,11 @@ export function ProfilePage() {
                     'Content-Type': 'application/json',
                     'x-auth-token': token || '',
                 },
-                body: JSON.stringify(newBlog),
+                body: JSON.stringify({ ...newBlog }),
             });
 
             if (response.ok) {
-                setNewBlog({ title: '', content: '', image: '' });
+                setNewBlog({ title: '', content: '', image: '', category: 'General' });
                 setIsCreatingBlog(false);
                 fetchBlogs(); // Refresh list
                 alert('Blog submitted for approval!');
@@ -351,62 +352,85 @@ export function ProfilePage() {
                                     )}
                                 </>
                             ) : (
-                                <form onSubmit={handleCreateBlog} className="space-y-4">
-                                    <div className="flex justify-between items-center mb-4">
+                                <form onSubmit={handleCreateBlog} className="space-y-5">
+                                    <div className="flex justify-between items-center">
                                         <h2 className="text-xl font-semibold text-kau-text">Write New Blog</h2>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCreatingBlog(false)}
-                                            className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                                        >
+                                        <button type="button" onClick={() => setIsCreatingBlog(false)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
                                             <X className="w-5 h-5" />
                                         </button>
                                     </div>
 
-                                    <input
-                                        type="text"
-                                        placeholder="Blog Title"
-                                        value={newBlog.title}
-                                        onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-kau-text focus:outline-none focus:border-kau-accent transition-colors"
-                                        required
-                                    />
+                                    {/* Title */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-kau-text-secondary">Blog Title *</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter a compelling title..."
+                                            value={newBlog.title}
+                                            onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-kau-text text-lg font-medium focus:outline-none focus:border-kau-accent transition-colors"
+                                            required
+                                        />
+                                    </div>
 
-                                    <textarea
-                                        placeholder="Write your content here..."
-                                        rows={10}
-                                        value={newBlog.content}
-                                        onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-kau-text focus:outline-none focus:border-kau-accent transition-colors resize-none"
-                                        required
-                                    />
-                                    <input
-                                        type="url"
-                                        placeholder="Cover image URL (optional) — e.g. https://images.unsplash.com/..."
-                                        value={newBlog.image}
-                                        onChange={(e) => setNewBlog({ ...newBlog, image: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-kau-text focus:outline-none focus:border-kau-accent transition-colors"
-                                    />
-                                    {newBlog.image && (
-                                        <div className="rounded-lg overflow-hidden border border-white/10 h-40">
-                                            <img src={newBlog.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                    {/* Category */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-kau-text-secondary flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Category</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['General', 'Markets', 'Economy', 'Tech', 'Policy'].map((cat) => (
+                                                <button
+                                                    key={cat}
+                                                    type="button"
+                                                    onClick={() => setNewBlog({ ...newBlog, category: cat })}
+                                                    className={cn(
+                                                        'px-4 py-1.5 rounded-full text-sm font-medium border transition-all',
+                                                        newBlog.category === cat
+                                                            ? 'bg-kau-accent text-kau-bg border-kau-accent'
+                                                            : 'border-white/10 text-kau-text-secondary hover:border-white/30 hover:text-kau-text'
+                                                    )}
+                                                >
+                                                    {cat}
+                                                </button>
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
 
-                                    <div className="flex justify-end gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCreatingBlog(false)}
-                                            className="px-4 py-2 text-sm font-medium text-kau-text-secondary hover:text-kau-text transition-colors"
-                                        >
+                                    {/* Cover Image */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-kau-text-secondary flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Cover Image URL <span className="text-kau-text-secondary/50">(optional)</span></label>
+                                        <input
+                                            type="url"
+                                            placeholder="https://images.unsplash.com/..."
+                                            value={newBlog.image}
+                                            onChange={(e) => setNewBlog({ ...newBlog, image: e.target.value })}
+                                            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2.5 text-kau-text focus:outline-none focus:border-kau-accent transition-colors"
+                                        />
+                                        {newBlog.image && (
+                                            <div className="rounded-lg overflow-hidden border border-white/10 h-44">
+                                                <img src={newBlog.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Rich Text Editor */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-kau-text-secondary">Content *</label>
+                                        <RichTextEditor
+                                            content={newBlog.content}
+                                            onChange={(html) => setNewBlog({ ...newBlog, content: html })}
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-end gap-3 pt-2">
+                                        <button type="button" onClick={() => setIsCreatingBlog(false)} className="px-4 py-2 text-sm font-medium text-kau-text-secondary hover:text-kau-text transition-colors">
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            disabled={isLoading}
+                                            disabled={isLoading || !newBlog.content || newBlog.content === '<p></p>'}
                                             className="px-6 py-2 bg-kau-accent text-kau-bg font-medium rounded-lg hover:bg-kau-accent/90 transition-colors disabled:opacity-50"
                                         >
-                                            {isLoading ? 'Publishing...' : 'Submit for Approval'}
+                                            {isLoading ? 'Submitting...' : 'Submit for Approval'}
                                         </button>
                                     </div>
                                 </form>
