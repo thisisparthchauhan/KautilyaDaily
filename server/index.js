@@ -5,7 +5,7 @@ const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
 
-dotenv.config();
+dotenv.config({ path: require('path').join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -42,9 +42,7 @@ const connectDB = async () => {
     if (isConnected) return;
 
     try {
-        const db = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kautilyadaily', {
-            bufferCommands: false, // Disable mongoose buffering
-        });
+        const db = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/kautilyadaily');
         isConnected = db.connections[0].readyState;
         console.log('MongoDB connected');
     } catch (err) {
